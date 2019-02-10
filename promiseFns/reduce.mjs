@@ -1,16 +1,15 @@
 import define from "../define";
 
 const impl = async (that, reducer, initialValue) => {
-  const values = await that.all();
+  const values = await that;
   const length = values.length;
   if (!length) return await initialValue;
-
   let i = 0;
   let result = initialValue == null ?
     await values[i++] :
     await initialValue;
   for (; i < length; ++i) {
-    result = await reducer(result, values[i], i, length);
+    result = await reducer(result, await values[i], i, length);
   }
   return result;
 };

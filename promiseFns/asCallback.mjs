@@ -1,5 +1,5 @@
 import define from "../define";
-import { default as escape } from "./utils/nextTick";
+import escape from "./utils/nextTick";
 
 export default function(Bluebird) {
   define(Bluebird.prototype, {

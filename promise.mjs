@@ -1,18 +1,20 @@
-import * as promiseErrors from "./promiseErrors/index";
-import * as promiseFns from "./promiseFns/index";
+import * as errors from "./promiseErrors/index";
+import * as fns from "./promiseFns/index";
 import then from "./promiseFns/then";
 import setScheduler from "./promiseFns/setScheduler";
 import define from "./define";
+
+const extensions = [errors, fns].flatMap(x => Object.values(x));
+const configs = {
+  config(obj) { /* logger.active = !!obj.warnings; */ },
+  longStackTraces() {},
+  hasLongStackTraces() { return false; },
+};
 
 function factory() {
   class Bluebird extends Promise {}
   // Bluebird.TypeError is used in tests
   define(Bluebird, "TypeError", TypeError);
-
-  const extensions = [
-    ...Object.values(promiseErrors),
-    ...Object.values(promiseFns)
-  ];
 
   for (const extension of extensions) {
     extension(Bluebird);
@@ -22,11 +24,7 @@ function factory() {
   // const warningThen = then(Bluebird, logger);
 
   setScheduler(Bluebird);
-  define(Bluebird, {
-    config(obj) { /* logger.active = !!obj.warnings; */ },
-    longStackTraces() {},
-    hasLongStackTraces() { return false; },
-  });
+  define(Bluebird, configs);
 
   // converted from async to traditional .then() since native async/await return
   // native promises.

@@ -1,5 +1,13 @@
 import define from "../define";
-import { isPromise } from "./util";
+
+function isPromise(obj) {
+  switch (typeof obj) {
+    case "object": if (obj != null) break;
+    case "undefined": return false;
+    default: break;
+  }
+  return typeof obj.then === "function";
+}
 
 const handlers = [
   value => ({ value, errorMode: false }),
@@ -34,8 +42,7 @@ async function processValue(value, yieldHandlers) {
 
 export default function(Bluebird) {
   const yieldHandlers = [];
-
-  const coroutine = define(
+  define(Bluebird, "coroutine", define(
     function coroutine(generator, { yieldHandler = null } = {}) {
       return function(...args) {
         const allYieldHandlers = yieldHandler ?
@@ -52,7 +59,5 @@ export default function(Bluebird) {
       }
       yieldHandlers.push(handler);
     }
-  );
-
-  define(Bluebird, "coroutine", coroutine);
+  ));
 }

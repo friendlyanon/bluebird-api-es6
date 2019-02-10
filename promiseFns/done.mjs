@@ -1,7 +1,7 @@
 import define from "../define";
-import nextTick from "./utils/nextTick";
+import escape from "./utils/nextTick";
 
-const thrower = e => nextTick(() => { throw e; });
+const thrower = e => escape(() => { throw e; });
 
 export default function(Bluebird) {
   define(Bluebird.prototype, {

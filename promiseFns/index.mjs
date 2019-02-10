@@ -23,7 +23,6 @@ export { default as catchThrow } from "./catchThrow";
 export { default as _catch } from "./catch";
 export { default as error } from "./error";
 export { default as coroutine } from "./coroutine";
-export { default as cast } from "./cast";
 export { default as asCallback } from "./asCallback";
 export { default as noConflict } from "./noConflict";
 export { default as defer } from "./defer";

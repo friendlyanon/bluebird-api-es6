@@ -1,19 +1,21 @@
 import define from "../define";
 
-const impl = async (that, iterator) => {
-  const values = await that.all();
+const impl = async (that, iterator, context) => {
+  const values = await that;
   const length = values.length;
   for (let i = 0; i < length; ++i) {
-    await iterator(values[i], i, length);
+    await iterator.call(context, await values[i], i, length);
   }
   return values;
 };
 
 export default function(Bluebird) {
   define(Bluebird, {
-    each: (promise, iterator) => Bluebird.resolve(promise).each(iterator)
+    each: (v, iterator, opts) => Bluebird.resolve(v).each(iterator, opts)
   });
   define(Bluebird.prototype, {
-    each(iterator) { return Bluebird.resolve(impl(this, iterator)); }
+    each(iterator, { context = null } = {}) {
+      return Bluebird.resolve(impl(this, iterator, context));
+    }
   });
 }

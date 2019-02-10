@@ -1,9 +1,9 @@
 import define from "../define";
 
 const filterFunc = function(_, i) { return !!this[i]; };
-const impl = async (that,  predicate, concurrency) => {
+const impl = async (that,  predicate, opts) => {
   const values = await that.all();
-  const predicateResults = await that.map(predicate, { concurrency });
+  const predicateResults = await that.map(predicate, opts);
   return values.filter(filterFunc, predicateResults);
 };
 
@@ -12,8 +12,8 @@ export default function(Bluebird) {
     filter: (v, predicate, opts) => Bluebird.resolve(v).filter(predicate, opts)
   });
   define(Bluebird.prototype, {
-    filter(predicate, { concurrency } = {}) {
-      return Bluebird.resolve(impl(this, predicate, concurrency));
+    filter(predicate, opts) {
+      return Bluebird.resolve(impl(this, predicate, opts));
     }
   });
 }

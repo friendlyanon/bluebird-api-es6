@@ -9,8 +9,8 @@ class AggregateError extends OperationalError {
     this.length = 0;
   }
   toString() {
-    let message = `\n${" ".repeat(4 * level++)}AggregateError of:\n`;
-    const indent = " ".repeat(4 * level);
+    let message = `${" ".repeat(4 * level)}AggregateError of:\n`;
+    const indent = " ".repeat(4 * ++level);
     for (const error of this) {
       try {
         message += `${

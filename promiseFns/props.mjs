@@ -27,7 +27,7 @@ const impl = value => {
 
 export default function(Bluebird) {
   define(Bluebird, {
-    props: v => Bluebird.resolve(v).props()
+    props: v => Bluebird.resolve(v).then(impl)
   });
   define(Bluebird.prototype, {
     props() { return this.then(impl); }

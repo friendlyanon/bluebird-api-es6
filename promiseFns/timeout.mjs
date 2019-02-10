@@ -17,7 +17,7 @@ export default function(Bluebird) {
   });
   define(Bluebird.prototype, {
     timeout(ms, message) {
-      return Bluebird.resolve(impl(this, ms >>> 0, message, Bluebird));
+      return Bluebird.resolve(impl(this, ms, message, Bluebird));
     }
   });
 }
