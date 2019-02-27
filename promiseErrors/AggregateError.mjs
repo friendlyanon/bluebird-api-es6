@@ -24,16 +24,16 @@ class AggregateError extends OperationalError {
     --level;
     return message;
   }
-  static get [Symbol.species]() { return Array; }
+  static get [Symbol.species]() {
+    return Array;
+  }
 }
 
 const [source, target] = [Array.prototype, AggregateError.prototype];
+const ignored = ["length", "constructor", "toString", "toLocaleString"];
 
 for (const key of Reflect.ownKeys(source)) {
-  switch (key) {
-    case "length": case "constructor": case "toString": case "toLocaleString":
-      continue;
-  }
+  if (ignored.includes(key)) continue;
   define(target, key, source[key]);
 }
 

@@ -3,44 +3,43 @@ import define from "../define";
 // import escape from "./utils/nextTick";
 import Queue from "./utils/queue";
 const { ceil } = Math;
+const noop = () => {};
 
-async function step(fn, ctx, [[x, i], resolve, reject], len, counter, gen) {
+// ([mapper, ctx, length], [x, i, resolve, reject], gen)
+async function invoke(args, step, gen) {
   try {
-    resolve(await fn.call(ctx, await x, i, len));
-    --counter.count;
+    ++gen.count;
+    step[2](await args[0].call(args[1], await step[0], step[1], args[2]));
+    --gen.count;
     gen.next();
   }
   catch (e) {
-    reject(e);
-    gen.return();
+    step[3](e);
+    if (gen.next !== noop) gen.next = noop;
   }
 }
 
-function* throttle(fn, concurrency, ctx, _self, len) {
-  const { self } = _self;
-  const counter = { count: 0 };
-  const queue = new Queue;
-  const call = x => (++counter.count, step(fn, ctx, x, len, counter, self));
-  for (;;) {
-    const next = yield;
-    if (counter.count >= concurrency) {
-      if (next) queue.enqueue(next);
-      continue;
-    }
-    if (next) {
-      call(next);
-      continue;
-    }
-    if (!queue.size()) continue;
-    call(queue.dequeue());
+class Throttler {
+  constructor(x, ...args) {
+    this.args = args;
+    this.limit = x;
+    this.count = 0;
+    this.queue = new Queue;
+  }
+  push(step) {
+    if (this.count >= this.limit) this.queue.enqueue(step);
+    else void invoke(this.args, step, this);
+  }
+  next() {
+    if (this.count >= this.limit || !this.queue.size()) return;
+    void invoke(this.args, this.queue.dequeue(), this);
   }
 }
 
 const impl = (xs, mapper, concurrency, ctx) => {
-  const self = {}, gen = throttle(mapper, concurrency, ctx, self, xs.length);
-  (self.self = gen).next();
-  function then(...args) { gen.next([this.data, ...args]); }
-  return xs.map((x, i) => ({ data: [x, i], then }));
+  const t = new Throttler(concurrency, mapper, ctx, xs.length);
+  function then(r, e) { t.push([...this.xs, r, e]); this.xs = null; }
+  return xs.map((x, i) => ({ xs: [x, i], then }));
 };
 
 export default function(Bluebird) {

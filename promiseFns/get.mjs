@@ -2,7 +2,7 @@ import define from "../define";
 const { max } = Math;
 
 const impl = (value, prop) => {
-  if (typeof prop !== "number") return value[prop];
+  if (typeof prop !== "number" || !(value | 0 === value)) return value[prop];
   return prop < 0 ? value[max(prop + value.length, 0)] : value[prop];
 };
 

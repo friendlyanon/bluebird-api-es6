@@ -34,10 +34,15 @@ function factory() {
 
   return Bluebird;
 }
-const copy = define(factory(), "getNewLibraryCopy", () => {
-  const newCopy = factory();
-  newCopy.getNewLibraryCopy = copy.getNewLibraryCopy;
-  return newCopy;
-});
+
+const getNewProp = {
+  getNewLibraryCopy() {
+    const newCopy = factory();
+    define(newCopy, getNewProp);
+    return newCopy;
+  }
+};
+
+const copy = define(factory(), getNewProp);
 
 export default copy;

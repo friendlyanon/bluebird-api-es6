@@ -1,20 +1,16 @@
 import define from "../define";
 
-function method(fn) {
+function impl(fn) {
   if (typeof fn !== "function") {
     throw new TypeError("Non function passed to .method");
   }
-  const proxy = async function() {
-    return fn.apply(this, arguments);
-  };
   const Bluebird = this;
-  const name = fn.name;
-  // this way the function name is preserved if it's not a symbol
-  return { [name]() {
-    return Bluebird.resolve(proxy.apply(this, arguments));
-  } }[name];
+  return define(function() {
+    try { return Bluebird.resolve(fn.apply(this, arguments)); }
+    catch (e) { return Bluebird.reject(e); }
+  }, "name", fn.name);
 }
 
 export default function(Bluebird) {
-  define(Bluebird, "method", method.bind(Bluebird));
+  define(Bluebird, "method", impl.bind(Bluebird));
 }
