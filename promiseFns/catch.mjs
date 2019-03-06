@@ -2,7 +2,7 @@ import define from "../define";
 
 const makeFilter = (filterTest, predicate) => ({ filterTest, predicate });
 const filterConfigs = [
-  // Error consturctor
+  // Error constructor
   makeFilter(
     t => t && (t === Error || t.prototype instanceof Error),
     (t, error) => error instanceof t

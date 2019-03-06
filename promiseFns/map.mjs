@@ -1,23 +1,6 @@
 import define from "../define";
-// TODO: investigate stack overflow potential
-// import escape from "./utils/nextTick";
 import Queue from "./utils/queue";
 const { ceil } = Math;
-const noop = () => {};
-
-// ([mapper, ctx, length], [x, i, resolve, reject], gen)
-async function invoke(args, step, gen) {
-  try {
-    ++gen.count;
-    step[2](await args[0].call(args[1], await step[0], step[1], args[2]));
-    --gen.count;
-    gen.next();
-  }
-  catch (e) {
-    step[3](e);
-    if (gen.next !== noop) gen.next = noop;
-  }
-}
 
 class Throttler {
   constructor(x, ...args) {
@@ -25,14 +8,25 @@ class Throttler {
     this.limit = x;
     this.count = 0;
     this.queue = new Queue;
+    this.rejectCount = 0;
   }
   push(step) {
     if (this.count >= this.limit) this.queue.enqueue(step);
-    else void invoke(this.args, step, this);
+    else void this.iterator(step);
   }
-  next() {
-    if (this.count >= this.limit || !this.queue.size()) return;
-    void invoke(this.args, this.queue.dequeue(), this);
+  async iterator(step) {
+    const { queue, args: { 0: fn, 1: ctx, 2: length} } = this;
+    for (++this.count; this.rejectCount === 0; step = queue.dequeue()) {
+      try {
+        step[2].call(null, await fn.call(ctx, await step[0], step[1], length));
+      }
+      catch (e) {
+        ++this.rejectCount;
+        step[3].call(null, e);
+        break;
+      }
+      if (queue.size() === 0) break;
+    }
   }
 }
 
