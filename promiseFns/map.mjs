@@ -15,7 +15,7 @@ class Throttler {
     else void this.iterator(step);
   }
   async iterator(step) {
-    const { queue, args: { 0: fn, 1: ctx, 2: length} } = this;
+    const { queue, args: { 0: fn, 1: ctx, 2: length } } = this;
     for (++this.count; this.rejectCount === 0; step = queue.dequeue()) {
       try {
         step[2].call(null, await fn.call(ctx, await step[0], step[1], length));
