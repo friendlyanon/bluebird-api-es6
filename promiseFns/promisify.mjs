@@ -90,10 +90,8 @@ function internalPromisifyAll(obj, suffix, filter, promisifier, multiArgs) {
   for (const key of getKeys(obj)) {
     const fn = obj[key];
     if (
-      (
-        typeof fn !== "function" ||
-        promisifiedMap.has(fn) || promisifiedMap.has(obj[key + suffix])
-      ) ||
+      typeof fn !== "function" ||
+      promisifiedMap.has(fn) || promisifiedMap.has(obj[key + suffix]) ||
       typeof filter === "function" ?
         !filter(key, fn, obj, !defaultFilter(key)) :
         defaultFilter(key)

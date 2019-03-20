@@ -3,13 +3,10 @@ import escape from "./utils/nextTick";
 
 export default function(Bluebird) {
   define(Bluebird.prototype, {
-    asCallback(cb, opts) {
-      const more = opts && opts.spread;
-      // opt out of unhandledRejection detection
-      this.catch(() => {});
+    asCallback(cb, { spread } = {}) {
       this.then(
-        v => escape(() => { more ? cb(null, ...v) : cb(null, v); }),
-        e => escape(() => cb(e))
+        v => { escape(() => spread ? cb(null, ...v) : cb(null, v)); },
+        e => { escape(() => cb(e)); }
       );
     }
   });

@@ -2,6 +2,21 @@ import define from "../define";
 import Queue from "./utils/queue";
 const { ceil } = Math;
 
+async function iterator(step) {
+  const { queue, args: { 0: fn, 1: ctx, 2: length } } = this;
+  for (++this.count; this.rejectCount === 0; step = queue.dequeue()) {
+    try {
+      step[2].call(null, await fn.call(ctx, await step[0], step[1], length));
+    }
+    catch (e) {
+      ++this.rejectCount;
+      step[3].call(null, e);
+      break;
+    }
+    if (queue.size() === 0) break;
+  }
+}
+
 class Throttler {
   constructor(x, ...args) {
     this.args = args;
@@ -12,21 +27,7 @@ class Throttler {
   }
   push(step) {
     if (this.count >= this.limit) this.queue.enqueue(step);
-    else void this.iterator(step);
-  }
-  async iterator(step) {
-    const { queue, args: { 0: fn, 1: ctx, 2: length } } = this;
-    for (++this.count; this.rejectCount === 0; step = queue.dequeue()) {
-      try {
-        step[2].call(null, await fn.call(ctx, await step[0], step[1], length));
-      }
-      catch (e) {
-        ++this.rejectCount;
-        step[3].call(null, e);
-        break;
-      }
-      if (queue.size() === 0) break;
-    }
+    else void iterator.call(this, step);
   }
 }
 

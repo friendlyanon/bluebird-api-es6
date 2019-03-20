@@ -1,11 +1,9 @@
 import define from "../define";
 
 const impl = (result, methodName, args) => {
-  const method = result && result[methodName];
-  if (method) return method.apply(result, args);
-  const up = new Error(`Method ${methodName} doesn't exist`);
-  up.object = result;
-  throw up;
+  const method = result != null && result[methodName];
+  if (typeof method === "function") return method.apply(result, args);
+  throw new Error(`Method ${methodName} doesn't exist`);
 };
 
 export default function(Bluebird) {

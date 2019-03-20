@@ -23,10 +23,10 @@ const impl = async function(resolve, reject) {
       else if (disposer.then) return Bluebird.resolve(disposer);
       return null;
     }));
-    return resolve(await fn(...resources));
+    resolve(await fn(...resources));
   }
   catch (e) {
-    return reject(e);
+    reject(e);
   }
   finally {
     try {

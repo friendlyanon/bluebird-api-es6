@@ -1,13 +1,6 @@
 import define from "../define";
 
-function isPromise(obj) {
-  switch (typeof obj) {
-    case "object": if (obj != null) break;
-    case "undefined": return false;
-    default: break;
-  }
-  return typeof obj.then === "function";
-}
+const isPromise = obj => obj != null && typeof obj.then === "function";
 
 const handlers = [
   value => ({ value, errorMode: false }),
@@ -35,9 +28,7 @@ function* handlerResults(value, yieldHandlers) {
 async function processValue(value, yieldHandlers) {
   const [result] = handlerResults(value, yieldHandlers);
   if (isPromise(result)) return await result;
-  const up = new TypeError("Not a promise");
-  up.object = result;
-  throw up;
+  throw new TypeError("Not a promise");
 }
 
 export default function(Bluebird) {

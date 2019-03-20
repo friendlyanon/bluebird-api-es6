@@ -1,10 +1,10 @@
 import define from "../define";
 import escape from "./utils/nextTick";
 
-const thrower = e => escape(() => { throw e; });
+const thrower = e => { escape(() => { throw e; }); };
 
 export default function(Bluebird) {
   define(Bluebird.prototype, {
-    done() { this.catch(thrower); }
+    done(...args) { this.then(...args).catch(thrower); }
   });
 }
